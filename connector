@@ -1,0 +1,97 @@
+#Establish connection to MYSQL database
+import mysql.connector
+
+try:
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="mysql",
+        database="company"
+    )
+
+    #Create a Cursor object
+    if conn.is_connected(): 
+        cursor = conn.cursor()
+        # SQL query to create the Employee table
+        create_table_query = """
+        CREATE TABLE IF NOT EXISTS Emp (
+        Ename VARCHAR(100),
+        Empid VARCHAR(10) PRIMARY KEY,
+        Designation VARCHAR(50),
+        Hiredate DATE,
+        Salary DECIMAL(10, 2),
+        Dno INT
+        )
+        """
+
+        # Execute the query to create the table
+        cursor.execute(create_table_query)
+
+        # Commit the changes
+        conn.commit()
+
+        # Insert data into the Employee table
+        insert_query = """
+            INSERT INTO Emp (Ename, Empid, Designation, Hiredate, Salary, Dno)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+
+        # Sample data to insert
+        employee_data = [
+            ('John Doe', 'E001', 'Manager', '2020-06-15', 70000, 101),
+            ('Jane Smith', 'E002', 'Developer', '2019-09-23', 60000, 102),
+            ('Mike Johnson', 'E003', 'Analyst', '2021-02-01', 50000, 101)
+        ]
+
+        # Insert each employee record
+        for employee in employee_data:
+            cursor.execute(insert_query,employee)
+
+        # Commit the transaction
+        conn.commit()
+
+        # Query to select all rows
+        select_query = "SELECT * FROM Emp"
+
+        # Execute the query
+        cursor.execute(select_query)
+
+        # Fetch all the results
+        result = cursor.fetchall()
+        print('Employee details')
+        # Print the results
+        for row in result:
+            print(row)
+
+        # Query to filter employees with salary greater than 60000
+        filter_query = "SELECT * FROM Emp WHERE Salary > 60000"
+
+        # Execute the query
+        cursor.execute(filter_query)
+
+        # Fetch the results
+        result = cursor.fetchall()
+        print('Employees whose salary is more than 60000')
+        # Print the results
+        for row in result:
+            print(row)
+
+        # Query to count employees in department 101
+        count_query = "SELECT COUNT(*) FROM Emp WHERE Dno = 101"
+
+        # Execute the query
+        cursor.execute(count_query)
+
+        # Fetch the result
+        result = cursor.fetchone()
+
+        # Print the count
+        print("Number of employees in Department 101:", result[0])
+
+except mysql.connector.Error as e: 
+    print(f"Error: '{e}'") 
+finally: 
+    if conn.is_connected(): 
+        cursor.close() 
+        conn.close() 
+        print("MySQL connection is closed.")

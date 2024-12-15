@@ -1,0 +1,144 @@
+6 exp
+
+>db.posts.insertOne({
+     title: "Introduction to MongoDB",
+     body: "MongoDB is a NoSQL database that stores data in JSON-like format...",
+     category: "Database",
+     likes: 120,
+     tags: ["MongoDB", "NoSQL", "Database"],
+     date: new Date("2024-01-15")
+});
+
+
+>db.posts.insertMany([
+    {
+        title: "Understanding Indexes in MongoDB",
+        body: "Indexes are special data structures in MongoDB...",
+        category: "Database",
+        likes: 85,
+        tags: ["MongoDB", "Indexes", "Database"],
+        date: new Date("2024-01-20")
+    },
+    {
+        title: "JavaScript for Beginners",
+        body: "JavaScript is a versatile language for web development...",
+        category: "Programming",
+        likes: 200,
+        tags: ["JavaScript", "Web Development", "Programming"],
+        date: new Date("2024-01-22")
+    },
+    {
+        title: "Machine Learning Basics",
+        body: "Machine learning is a field of artificial intelligence...",
+        category: "AI",
+        likes: 150,
+        tags: ["Machine Learning", "AI", "Data Science"],
+        date: new Date("2024-01-25")
+    }
+]);
+
+a.	To retrieve all documents
+>db.posts.find();
+
+b.	Find all documents where the value for "category" is “Database”
+> db.posts.find({category:"Database"});
+c.	Find all documents with more than 150 likes
+> db.posts.find({likes: { $gt: 150 }});
+d.	Find all posts where “likes” is between 100 and 300
+    > db.posts.find({"likes" : {"$lt" : 300, "$gt" : 100}})
+
+e.	Find documents where category is "Database" or "Programming"
+> db.posts.find({ $or: [{ category: "Database" }, { category: "Programming" }] });
+
+f.	To retrieve documents where either the likes are more than 100 or the post has a tag of "JavaScript"
+> db.posts.find({
+    $or: [
+        { likes: { $gt: 100 } },
+        { tags: "JavaScript" }
+    ]
+});
+g.	Find posts in the "Programming" category with more than 100 Likes
+> db.posts.find({
+    		$and: [
+        			{ category: "Programming" },
+        			{ likes: { $gt: 100 } }
+    		]
+                 });
+
+
+
+7.a.	Create the ‘posts’ Collection and Insert Data
+                      >db.posts.insertMany([
+    {
+        title: " Understanding Indexes in MongoDB ",
+        author: "Sowmya",
+        content: " Indexes are special data structures in MongoDB...",
+        category: "Tech",
+        likes: 50,
+        tags: ["JavaScript", "MongoDB"],
+        date: new Date("2024-11-01")
+    },
+    {
+        title: " JavaScript for Beginners ",
+        author: "Ram",
+        content: " JavaScript is a versatile language for web development...",
+        category: "Health",
+        likes: 30,
+        tags: ["Fitness", "Wellness"],
+        date: new Date("2024-11-02")
+    },
+    {
+        title: " Machine Learning Basics ",
+        author: "Raghu",
+        content: " Machine learning is a field of artificial intelligence...",
+        category: "Tech",
+        likes: 70,
+        tags: ["Programming", "Database"],
+        date: new Date("2024-11-03")
+    },
+    {
+        title: "Post 4",
+        author: "Charlie",
+        content: "Content of post 4",
+        category: "Food",
+        likes: 40,
+        tags: ["Cooking", "Recipes"],
+        date: new Date("2024-01-04")
+    }
+]);
+
+b.	Query for Filtering by author and Sorting by date (Before creating index)
+> db.posts.find({ author: "Alice" }).sort({ date: -1 });
+c.	Query for Filtering by ‘author’ and sorting by ‘date’ (before creating index)
+> db.posts.find({ author: "Charlie" }).sort({ date: -1 }).explain("executionStats");
+
+d.	Create a compound index on the ‘posts’ collection using the fields ‘author’ (ascending) and ‘date’ (descending)
+            >db.posts.createIndex({ author: 1, date: -1 });
+e.	Query for Filtering by ‘author’ and sorting by ‘date’ (After creating index) 
+> db.posts.find({ author: "Charlie" }).sort({ date: -1 }).explain("executionStats");  
+
+
+
+
+
+
+8 a.	Create the ‘posts’ Collection and Insert Data (Refer Query 7)
+b.	Define the Map Function: The map function emits the ‘author’ as the key and the ‘likes’ as the value.
+const mapFunction = function () {
+    emit(this.author, this.likes);
+};
+c.	Define the Reduce Function: The reduce function sums up the ‘likes’ for each ‘author’.
+const reduceFunction = function (key, values) {
+    return Array.sum(values);
+};
+d.	Run MapReduce: Use the mapReduce method to apply the map and reduce functions.
+db.posts.mapReduce(
+    mapFunction,
+    reduceFunction,
+    {
+        out: "author_likes_totals" // Output the results to a new collection.
+    }
+);
+e.	View the Results: The results are stored in a new collection named author_likes_totals. Query this collection to see the output:
+db.author_likes_totals.find();
+
